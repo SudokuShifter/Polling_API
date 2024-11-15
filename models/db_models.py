@@ -1,10 +1,10 @@
 import enum
 from datetime import date
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Enum
-from sqlalchemy.orm import relationship, declared_attr, Mapped, mapped_column
+from sqlalchemy import ForeignKey, Enum
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects.postgresql import ENUM as PgEnum
+
 
 Base = declarative_base()
 

@@ -1,6 +1,3 @@
-from typing import Optional
-
-from pydantic.dataclasses import dataclass
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 import os
