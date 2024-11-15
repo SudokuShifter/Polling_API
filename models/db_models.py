@@ -4,6 +4,7 @@ from datetime import date
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Enum
 from sqlalchemy.orm import relationship, declared_attr, Mapped, mapped_column
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import ENUM as PgEnum
 
 Base = declarative_base()
 
@@ -35,10 +36,8 @@ class User(Base):
     password: Mapped[str] = mapped_column(
         nullable=False
     )
-    role: Mapped[RoleUserEnum] = mapped_column(
-        Enum(RoleUserEnum),
-        default=RoleUserEnum.USER,
-        create_type=False
+    role: Mapped[str] = mapped_column(
+        nullable=False, default=RoleUserEnum.USER,
     )
     polls = relationship(
         'Poll', back_populates='admin', cascade='all, delete, delete-orphan'
@@ -87,8 +86,7 @@ class Question(Base):
     )
     answer: Mapped[TypeQuestionEnum] = mapped_column(
         Enum(TypeQuestionEnum),
-        default=TypeQuestionEnum.ANSWER_CHOICE_ONE,
-        create_type=False
+        default=TypeQuestionEnum.ANSWER_CHOICE_ONE
     )
     poll_id: Mapped[int] = mapped_column(
         ForeignKey('polls.id'), nullable=False
