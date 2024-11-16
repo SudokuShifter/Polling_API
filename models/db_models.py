@@ -36,8 +36,9 @@ class User(Base):
     password: Mapped[str] = mapped_column(
         nullable=False
     )
-    role: Mapped[str] = mapped_column(
-        nullable=False, default=RoleUserEnum.USER,
+    role: Mapped[RoleUserEnum] = mapped_column(
+        Enum(RoleUserEnum),
+        default=RoleUserEnum.USER,
     )
     polls = relationship(
         'Poll', back_populates='admin', cascade='all, delete, delete-orphan'
@@ -67,6 +68,7 @@ class Poll(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id'), nullable=False
     )
+    aboba: Mapped[bool] = mapped_column()
 
     # Связи
     user = relationship('User', back_populates='polls')
@@ -86,7 +88,7 @@ class Question(Base):
     )
     answer: Mapped[TypeQuestionEnum] = mapped_column(
         Enum(TypeQuestionEnum),
-        default=TypeQuestionEnum.ANSWER_CHOICE_ONE
+        default=TypeQuestionEnum.ANSWER_CHOICE_ONE,
     )
     poll_id: Mapped[int] = mapped_column(
         ForeignKey('polls.id'), nullable=False
@@ -108,6 +110,9 @@ class UserResult(Base):
     )
     poll_id: Mapped[int] = mapped_column(
         ForeignKey('polls.id'), nullable=False
+    )
+    result: Mapped[int] = mapped_column(
+        nullable=False, default=0,
     )
 
     # Связи

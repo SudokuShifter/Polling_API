@@ -1,8 +1,27 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
 from datetime import datetime, timedelta, date
+
+
+class QuestionIn(BaseModel):
+    title: str = Field(
+        min_length=3, max_length=100
+    )
+    type: str = Field(
+        min_length=1, max_length=100
+    )
+    answer: Optional[str] = Field(
+        min_length=1, max_length=100
+    )
+
+    class Config:
+        orm_mode = True
+
+
+class QuestionOut(QuestionIn):
+    id: int
 
 
 class PollInChange(BaseModel):
@@ -25,19 +44,4 @@ class PollInFirst(PollInChange):
 
 class PollOut(PollInFirst):
     id: int
-
-
-class QuestionIn(BaseModel):
-    title: str = Field(
-        min_length=3, max_length=100
-    )
-    type: str = Field(
-        min_length=1, max_length=100
-    )
-    answer: Optional[str] = Field(
-        min_length=1, max_length=100
-    )
-
-
-class QuestionOut(QuestionIn):
-    id: int
+    questions: Optional[List[QuestionOut] | None]
