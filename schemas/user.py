@@ -15,7 +15,7 @@ class UserOut(BaseModel):
     role: str = Field(
         min_length=3, max_length=50, default='user'
     )
-    polls: List[PollOut]
+    polls: Optional[List[PollOut]]
 
 
     class Config:
