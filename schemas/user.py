@@ -1,5 +1,8 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
+
+from typing import Optional, List
+
+from .poll import PollOut
 
 
 class UserOut(BaseModel):
@@ -9,6 +12,11 @@ class UserOut(BaseModel):
     email: EmailStr = Field(
         min_length=3, max_length=50
     )
+    role: str = Field(
+        min_length=3, max_length=50, default='user'
+    )
+    polls: Optional[List[PollOut]]
+
 
     class Config:
         orm_mode = True
@@ -25,6 +33,6 @@ class UserIn(UserOut):
 
 class User(UserIn):
     id: int
-    role: str = Field(min_length=3, max_length=50, default='user')
+
 
 
