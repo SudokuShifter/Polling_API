@@ -5,13 +5,16 @@ from typing import Optional, List
 from .poll import PollOut
 
 
-class UserOut(BaseModel):
+class UserChange(BaseModel):
     username: str = Field(
         min_length=3, max_length=50
     )
     email: EmailStr = Field(
         min_length=3, max_length=50
     )
+
+
+class UserOut(UserChange):
     role: str = Field(
         min_length=3, max_length=50, default='user'
     )

@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 
 
 from schemas.user import UserIn, User, UserOut
-from models.db_models import User
 
 
 reg_auth = APIRouter()
@@ -21,7 +20,7 @@ async def register(user: Optional[UserIn]):
     if user:
         user_data = user.dict()
         if user_data['admin_token'] and user_data['admin_token'] == os.getenv('ADMIN_TOKEN'):
-            pass
+
 
 
 
