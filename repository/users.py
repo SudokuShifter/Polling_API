@@ -1,6 +1,6 @@
-from http.client import responses
+from fastapi import HTTPException
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from db.database import async_session_marker
 
@@ -23,7 +23,10 @@ class UserRepository:
     async def get_user(user_id: int):
         async with async_session_marker() as session:
             res = await session.execute(select(User).where(User.id == user_id))
-            return res.scalars().first()
+            user = res.scalars().first()
+            if user is None:
+                raise HTTPException(404, detail='User not found')
+            return user
 
 
     @staticmethod
@@ -41,23 +44,29 @@ class UserRepository:
         async with async_session_marker() as session:
             async with session.begin():
                 user_in_db = await session.execute(select(User).where(User.id == user_id))
-                user_in_db = user_in_db.scalar().first()
-
-                if not user:
+                user_in_db = user_in_db.scalars().first()
+                if user:
                     for key, value in user.dict(exclude_unset=True).items():
                         setattr(user_in_db, key, value)
+                else:
+                    raise HTTPException(404, detail='User not found')
 
             await session.commit()
             return user
+
 
     @staticmethod
     async def delete_user(user_id: int):
         async with async_session_marker() as session:
             async with session.begin():
                 user_in_db = await session.execute(select(User).where(User.id == user_id))
-                if user_in_db.scalars().first():
+                user_in_db = user_in_db.scalars().first()
+                if user_in_db:
                     await session.delete(user_in_db)
+                else:
+                    raise HTTPException(404, detail='User not found')
+
             await session.commit()
-            return user_in_db
+            return {'message': 'User deleted'}
 
 
