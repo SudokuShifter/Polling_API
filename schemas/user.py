@@ -5,33 +5,38 @@ from typing import Optional, List
 from .poll import PollOut
 
 
-class UserOut(BaseModel):
-    username: str = Field(
-        min_length=3, max_length=50
-    )
+class UserLogin(BaseModel):
     email: EmailStr = Field(
         min_length=3, max_length=50
     )
+    password: str = Field(
+        min_length=3, max_length=50
+    )
+
+    class Config:
+        orm_mode = True
+
+
+class UserChange(UserLogin):
+    username: str = Field(
+        min_length=3, max_length=50
+    )
+
+
+class UserIn(UserChange):
+    admin_token: Optional[str] = Field(
+        default=None, min_length=3, max_length=50
+    )
+
+
+class UserOut(UserIn):
     role: str = Field(
         min_length=3, max_length=50, default='user'
     )
     polls: Optional[List[PollOut]]
 
 
-    class Config:
-        orm_mode = True
-
-
-class UserIn(UserOut):
-    password: str = Field(
-        min_length=8, max_length=50
-    )
-    admin_token: Optional[str] = Field(
-        default=None, min_length=3, max_length=50
-    )
-
-
-class User(UserIn):
+class User(UserOut):
     id: int
 
 
