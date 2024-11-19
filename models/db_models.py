@@ -1,5 +1,6 @@
 import enum
 from datetime import date
+from typing import List, Optional
 
 from sqlalchemy import ForeignKey, Enum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -40,13 +41,11 @@ class User(Base):
         Enum(RoleUserEnum),
         default=RoleUserEnum.USER,
     )
-    polls = relationship(
-        'Poll', back_populates='admin', cascade='all, delete, delete-orphan'
-    )
 
     # Связи
+    polls = relationship('Poll', back_populates='admin', cascade='all, delete, delete-orphan')
     user_results = relationship('UserResult', back_populates='user')
-
+    results = relationship('UserResult', back_populates='user')
 
 
 class Poll(Base):
@@ -68,7 +67,6 @@ class Poll(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id'), nullable=False
     )
-    aboba: Mapped[bool] = mapped_column()
 
     # Связи
     user = relationship('User', back_populates='polls')
@@ -93,9 +91,36 @@ class Question(Base):
     poll_id: Mapped[int] = mapped_column(
         ForeignKey('polls.id'), nullable=False
     )
+    current_answer: Mapped[Optional[str]] = mapped_column(
+        nullable=False
+    )
 
     # Связи
     poll = relationship('Poll', back_populates='questions')
+    answers = relationship('Answer', back_populates='question', cascade='all, delete, delete-orphan')
+
+
+class Answer(Base):
+
+    __tablename__ = 'answers'
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+    poll_id: Mapped[int] = mapped_column(
+        ForeignKey('polls.id'), nullable=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id'), nullable=True
+    )
+    answer: Mapped[bool] = mapped_column(
+        default=False
+    )
+
+    #Связи
+    poll = relationship('Poll', back_populates='answer')
+    question = relationship('Question', back_populates='answer')
+
 
 
 class UserResult(Base):

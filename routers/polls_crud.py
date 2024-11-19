@@ -17,8 +17,8 @@ class PollCrud(APIRouter):
         self.model = model
         self.rep = rep
 
-
-    async def is_admin(self, current_user: dict) -> bool:
+    @staticmethod
+    async def is_admin(current_user: dict) -> bool:
         if current_user['role'] == 'admin':
             return True
         raise HTTPException(status_code=403, detail='Not permissions')
@@ -36,7 +36,7 @@ class PollCrud(APIRouter):
 
 
     @get('/polls')
-    async def get_all_polls(self, response_class = List[PollOut]):
+    async def get_all_polls(self):
         res = await self.rep.get_all_polls()
         return PollCrud.generate_response(success=True, data={'polls': res})
 
