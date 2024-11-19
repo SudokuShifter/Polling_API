@@ -29,6 +29,13 @@ class ResultRepository:
 
     @staticmethod
     @with_session
+    async def get_results_by_id(user_id: int, session: AsyncSession) -> Sequence[UserResultOut]:
+        res = await session.scalars(select(UserResult).where(UserResult.user_id == user_id))
+        return res.all()
+
+
+    @staticmethod
+    @with_session
     async def get_one_result(result_id: int, session: AsyncSession) -> UserResultOut:
         res = await session.scalar(select(UserResult).where(UserResult.id == result_id))
         if not res:

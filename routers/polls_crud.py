@@ -4,8 +4,6 @@ from classy_fastapi import Routable, get, post, put, delete
 
 from typing import Optional, Annotated, List
 
-from JWT.JWT_token import JWTToken
-from repository.users import UserRepository
 from schemas.poll import PollInFirst, PollInChange, PollOut, QuestionIn
 from routers.reg_auth import LoginRegister
 
@@ -44,7 +42,8 @@ class PollCrud(APIRouter):
     @get('/polls/{poll_id}')
     async def get_poll(self, poll_id: int):
         poll = await self.rep.get_poll(poll_id)
-        questions = await self.rep.get_questions_by_poll_id(poll_id)
+        questions_full = await self.rep.get_questions_by_poll_id(poll_id)
+        questions = [question.title for question in questions_full]
         return PollCrud.generate_response(success=True, data={'poll': poll, 'questions': questions})
 
 

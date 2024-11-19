@@ -113,9 +113,11 @@ class Answer(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id'), nullable=True
     )
-    answer: Mapped[bool] = mapped_column(
+    answer: Mapped[str]
+    point: Mapped[bool] = mapped_column(
         default=False
     )
+
 
     #Связи
     poll = relationship('Poll', back_populates='answer')
