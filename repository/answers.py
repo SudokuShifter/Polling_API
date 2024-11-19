@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from db.database import async_session_marker
 
-from schemas.user_result import UserResultOut
+from schemas.user_result import UserResult as UserRes
 from models.db_models import UserResult, Question
 from decorators.session import with_session
 
@@ -22,21 +22,21 @@ class ResultRepository:
 
     @staticmethod
     @with_session
-    async def get_all_results(poll_id: int, session: AsyncSession) -> Sequence[UserResultOut]:
-        res = await session.scalars(select(UserResult).where(UserResult.poll_id == poll_id))
-        return res.all()
-
-
-    @staticmethod
-    @with_session
-    async def get_results_by_id(user_id: int, session: AsyncSession) -> Sequence[UserResultOut]:
+    async def get_all_results(user_id: int, session: AsyncSession) -> Sequence[UserRes]:
         res = await session.scalars(select(UserResult).where(UserResult.user_id == user_id))
         return res.all()
 
 
     @staticmethod
     @with_session
-    async def get_one_result(result_id: int, session: AsyncSession) -> UserResultOut:
+    async def get_results_by_id(user_id: int, session: AsyncSession) -> Sequence[UserRes]:
+        res = await session.scalars(select(UserResult).where(UserResult.user_id == user_id))
+        return res.all()
+
+
+    @staticmethod
+    @with_session
+    async def get_one_result(result_id: int, session: AsyncSession) -> UserRes:
         res = await session.scalar(select(UserResult).where(UserResult.id == result_id))
         if not res:
             raise HTTPException(404, detail='result not found')

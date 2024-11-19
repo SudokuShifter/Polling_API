@@ -17,8 +17,6 @@ class UserResult(UserResultOut):
 
 
 class AnswerIn(BaseModel):
-    poll_id: int
-    user_id: int
     answer: str
 
     class Config:
@@ -26,4 +24,7 @@ class AnswerIn(BaseModel):
 
 
 class AnswerOut(AnswerIn):
+    poll_id: int
+    user_id: int
     id: int
+    point: int

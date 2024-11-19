@@ -51,8 +51,11 @@ class LoginRegister(APIRouter):
     async def login(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         res = await self.rep.login(UserLogin(username=form_data.username, password=form_data.password))
         if res:
-            data_to_token = {'username': res.username,
-                             'role': res.role}
+            data_to_token = {
+                'id': res.id,
+                'username': res.username,
+                'role': res.role
+            }
             return JSONResponse(content={'message': f'Successfully logged in as {res.username}',
                     'token': f'{JWTToken.generate_token(data_to_token)}'})
         raise HTTPException(status_code=401, detail='Invalid credentials')

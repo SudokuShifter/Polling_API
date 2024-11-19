@@ -22,7 +22,7 @@ class PollCrud(APIRouter):
         raise HTTPException(status_code=403, detail='Not permissions')
 
 
-    async def user_has_poll_acess(self, current_user: dict, poll_id: int) -> bool:
+    async def user_has_poll_access(self, current_user: dict, poll_id: int) -> bool:
         if not await self.rep.polls_by_user(current_user['username'], poll_id):
             raise HTTPException(status_code=404, detail='Poll not found')
         return True
@@ -61,7 +61,7 @@ class PollCrud(APIRouter):
     async def update_poll(self, poll_id: int, poll_data: PollInChange,
                           current_user: dict = Depends(LoginRegister.get_current_user)):
         await self.is_admin(current_user)
-        await self.user_has_poll_acess(current_user, poll_id)
+        await self.user_has_poll_access(current_user, poll_id)
         res = await self.rep.update_poll(poll_id, poll_data)
         return PollCrud.generate_response(success=True, data={'success_delete': res})
 
@@ -71,7 +71,7 @@ class PollCrud(APIRouter):
     async def delete_poll(self, poll_id: int,
                           current_user: dict = Depends(LoginRegister.get_current_user)):
         await self.is_admin(current_user)
-        await self.user_has_poll_acess(current_user.get('user'), poll_id)
+        await self.user_has_poll_access(current_user.get('user'), poll_id)
         res = await self.rep.delete_poll(poll_id)
         return PollCrud.generate_response(success=True, data={'success_delete': res})
 
@@ -80,7 +80,7 @@ class PollCrud(APIRouter):
     async def add_question(self, poll_id: int, question: QuestionIn,
                            current_user: dict = Depends(LoginRegister.get_current_user)):
         await self.is_admin(current_user)
-        await self.user_has_poll_acess(current_user, poll_id)
+        await self.user_has_poll_access(current_user, poll_id)
         res = await self.rep.add_question(poll_id, question)
         return PollCrud.generate_response(success=True, data={'success add question': res})
 
@@ -91,7 +91,7 @@ class PollCrud(APIRouter):
                               current_user: dict = Depends(LoginRegister.get_current_user)):
 
         await self.is_admin(current_user)
-        await self.user_has_poll_acess(current_user, poll_id)
+        await self.user_has_poll_access(current_user, poll_id)
         res = await self.rep.delete_question_in_poll(poll_id, question_id)
         return PollCrud.generate_response(success=True, data={'success remove question': res})
 

@@ -40,14 +40,14 @@ class PollRepository:
 
     @staticmethod
     @with_session
-    async def get_questions_by_poll_id(poll_id: int, session: AsyncSession) -> List[Question]:
+    async def get_questions_by_poll_id(poll_id: int, session: AsyncSession) -> Sequence[Question]:
         res = await session.scalars(select(Question).where(Question.poll_id == poll_id))
         res = res.all()
 
         if res:
             return res
 
-        raise HTTPException(status_code=404, detail="Poll or Question not found")
+        raise HTTPException(status_code=404, detail="Poll or Questions not found")
 
 
     @staticmethod
@@ -116,7 +116,7 @@ class PollRepository:
             session.add(new_question)
 
         else:
-            raise HTTPException(400, detail='Poll not found')
+            raise HTTPException(404, detail='Poll not found')
 
         await session.commit()
         await session.refresh(new_question)

@@ -4,6 +4,7 @@ from classy_fastapi import get, post
 
 from schemas.user_result import AnswerIn
 from routers.reg_auth import LoginRegister
+from repository.polls import PollRepository
 
 
 class Answer(APIRouter):
@@ -22,5 +23,7 @@ class Answer(APIRouter):
 
 
     @get('/my_results')
-    async def get_my_answers(self, current_user: dict = Depends(LoginRegister.get_current_user)):
-        pass
+    async def get_my_results(self, current_user: dict = Depends(LoginRegister.get_current_user)):
+        await self.is_user(current_user)
+        user_id = current_user['id']
+        results = await self.rep.get_all_results(user_id=user_id)
