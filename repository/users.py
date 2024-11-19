@@ -22,11 +22,13 @@ class UserRepository:
     async def login(user: UserLogin):
         async with async_session_marker() as session:
             if user:
-                res = await session.execute(select(User).where(User.email == user.email))
-                if pbkdf2_sha256.verify(res.password, user.password):
-                    return True
-
-            raise HTTPException(401, 'Login or password failed')
+                try:
+                    res = await session.execute(select(User).where(User.email == user.email))
+                    if pbkdf2_sha256.verify(res.password, user.password):
+                        return res
+                except HTTPException:
+                    raise HTTPException(401, 'Login or password failed')
+            raise HTTPException(401, 'Login failed')
 
 
     @staticmethod

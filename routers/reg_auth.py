@@ -1,24 +1,19 @@
-from distutils.command.check import check
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from classy_fastapi import Routable, get, post
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
-import jwt
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Annotated
 import os
-from dotenv import load_dotenv
 
-
+from JWT.JWT_token import JWTToken
 from schemas.user import UserIn, User, UserOut, UserChange, UserLogin
 from schemas.poll import PollOut
 from schemas.user_result import UserResult
 
 
-load_dotenv()
-
-
 class LoginRegister(APIRouter):
 
+    OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl='/login')
 
     def __init__(self, model, rep):
         super().__init__()
@@ -43,11 +38,22 @@ class LoginRegister(APIRouter):
 
 
     @post('/login')
-    async def login(self, user: Optional[UserLogin],
-                    response_model=Optional[List[Union[UserOut, PollOut, UserResult]]]):
-        res = await self.rep.login(user)
+    async def login(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+        res = await self.rep.login(UserLogin(username=form_data.username, password=form_data.password))
         if res:
-            pass
+            data_to_token = {'username': res.username,
+                             'role': res.role}
+            return {'message': f'Successfully logged in as {res.username}',
+                    'token': f'{JWTToken.generate_token(data_to_token)}'}
+        return HTTPException(status_code=401, detail='Invalid credentials')
+
+
+    @get('/check_token')
+    async def check_token(self, token: str = Depends(OAUTH2_SCHEME)):
+        """
+        Подключить реддис и из него доставать действующие токены для проверки
+        """
+        pass
 
 
 
