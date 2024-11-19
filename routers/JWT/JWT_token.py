@@ -35,3 +35,5 @@ class JWTToken(JWT):
     def decode_token(self, token):
         payload = jwt.decode(token, JWTToken.SECRET_KEY, algorithms=[JWTToken.ALGORITHM])
         return payload.get('sub')
+
+

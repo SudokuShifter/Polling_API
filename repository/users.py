@@ -10,6 +10,7 @@ from models.db_models import User, RoleUserEnum
 
 class UserRepository:
 
+
     @staticmethod
     async def get_all_users():
         async with async_session_marker() as session:
