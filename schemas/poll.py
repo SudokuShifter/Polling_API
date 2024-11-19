@@ -22,6 +22,7 @@ class QuestionIn(BaseModel):
 
 class QuestionOut(QuestionIn):
     id: int
+    poll_id: Optional[int]
 
 
 class PollInChange(BaseModel):
