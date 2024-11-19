@@ -6,7 +6,7 @@ from .poll import PollOut
 
 
 class UserLogin(BaseModel):
-    email: EmailStr = Field(
+    username: str = Field(
         min_length=3, max_length=50
     )
     password: str = Field(
@@ -18,7 +18,7 @@ class UserLogin(BaseModel):
 
 
 class UserChange(UserLogin):
-    username: str = Field(
+    email: EmailStr = Field(
         min_length=3, max_length=50
     )
 
