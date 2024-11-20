@@ -107,11 +107,14 @@ class Answer(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True
     )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id'), nullable=True
+    )
     poll_id: Mapped[int] = mapped_column(
         ForeignKey('polls.id'), nullable=False
     )
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id'), nullable=True
+    question_id: Mapped[int] = mapped_column(
+        ForeignKey('questions.id'), nullable=False
     )
     answer: Mapped[str]
     point: Mapped[bool] = mapped_column(
@@ -120,9 +123,8 @@ class Answer(Base):
 
 
     #Связи
-    poll = relationship('Poll', back_populates='answer')
     question = relationship('Question', back_populates='answer')
-
+    poll = relationship('Poll', back_populates='answers')
 
 
 class UserResult(Base):

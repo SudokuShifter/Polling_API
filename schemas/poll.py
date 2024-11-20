@@ -12,7 +12,7 @@ class QuestionIn(BaseModel):
     type: str = Field(
         min_length=1, max_length=100
     )
-    answer: Optional[str] = Field(
+    current_answer: Optional[str] = Field(
         min_length=1, max_length=100
     )
 

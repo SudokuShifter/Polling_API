@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from ctypes import windll
+from datetime import datetime
 from os import write
 
 from fastapi import HTTPException
@@ -36,6 +37,15 @@ class PollRepository:
     async def get_poll_by_id(poll_id: int, session: AsyncSession) -> Optional[Poll]:
         res = await PollRepository.fetch_poll_or_none(poll_id, session)
         return res
+
+
+    @staticmethod
+    @with_session
+    async def poll_is_active(poll_id: int, session: AsyncSession) -> bool:
+        poll = await PollRepository.fetch_poll_or_none(poll_id, session)
+        if poll.date_end < datetime.now():
+            return False
+        return True
 
 
     @staticmethod
