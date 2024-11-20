@@ -1,26 +1,31 @@
 import jwt
 from fastapi import APIRouter, HTTPException, Depends
-from classy_fastapi import get, post
+from classy_fastapi import Routable, get, post
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
 
 from typing import Optional, Annotated
 import os
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from repository.session_db.session import get_db
 from routers.JWT.JWT_token import JWTToken
-from schemas.user import UserLogin
+from schemas.user import UserLogin, UserIn
 from models.db_models import User
 from repository.users import UserRepository
 
 
-class LoginRegister(APIRouter):
+class LoginRegisterRouter:
 
     OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl='/login')
 
-    def __init__(self, model, rep):
-        super().__init__()
-        self.model = model
+    def __init__(self, rep):
+        self.router = APIRouter()
         self.rep = rep
+        self.router.add_api_route('/register', self.register, methods=['POST'])
+        self.router.add_api_route('/login', self.login, methods=['POST'])
+        self.router.add_api_route('/check_token', self.check_token, methods=['GET'])
 
 
     @staticmethod
@@ -36,20 +41,19 @@ class LoginRegister(APIRouter):
             raise HTTPException(401, detail='Invalid or expired token')
 
 
-    @post('/register')
-    async def register(self, user):
+    async def register(self, user: UserIn, db: AsyncSession = Depends(get_db)):
         if user:
             if user.admin_token and user.admin_token == os.getenv('ADMIN_TOKEN'):
-                res = await self.rep.create_user(user, is_admin=True)
+                res = await self.rep.create_user(user, is_admin=True, session=db)
             else:
-                res = await self.rep.create_user(user, is_admin=False)
+                res = await self.rep.create_user(user, is_admin=False, session=db)
             return JSONResponse(content={'message': f'Successfully create user {res}'})
         raise HTTPException(status_code=404, detail='Data not found')
 
 
-    @post('/login')
-    async def login(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-        res = await self.rep.login(UserLogin(username=form_data.username, password=form_data.password))
+    async def login(self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+                    db: AsyncSession = Depends(get_db)):
+        res = await self.rep.login(UserLogin(username=form_data.username, password=form_data.password), session=db)
         if res:
             data_to_token = {
                 'id': res.id,
@@ -57,11 +61,10 @@ class LoginRegister(APIRouter):
                 'role': res.role
             }
             return JSONResponse(content={'message': f'Successfully logged in as {res.username}',
-                    'token': f'{JWTToken.generate_token(data_to_token)}'})
+                    'token': f'{JWTToken.generate_token(data=data_to_token)}'})
         raise HTTPException(status_code=401, detail='Invalid credentials')
 
 
-    @get('/check_token')
     async def check_token(self, token: str = Depends(OAUTH2_SCHEME)):
         """
         Подключить реддис и из него доставать действующие токены для проверки

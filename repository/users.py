@@ -10,44 +10,40 @@ from typing import List, Optional
 
 from schemas.user import UserIn, UserChange, UserLogin, UserOut
 from models.db_models import User, RoleUserEnum
-from repository.decorators.session import with_session
+
 
 class UserRepository:
 
-
     @staticmethod
-    @with_session
     async def get_all_users(session: AsyncSession) -> Sequence[User]:
         res = await session.scalars(select(User))
         return res.all()
 
 
     @staticmethod
-    @with_session
     async def login(user: UserLogin, session: AsyncSession) -> Optional[User]:
-        res = await session.scalar(select(User).where(User.email == user.email))
+        res = await session.scalar(select(User).where(User.username == user.username))
         if res and pbkdf2_sha256.verify(user.password, res.password):
             return res
         raise HTTPException(401, 'Login failed')
 
 
     @staticmethod
-    @with_session
     async def get_user(user_id: int, session: AsyncSession) -> Optional[User]:
         user = await session.scalar(select(User).where(User.id == user_id))
         return user if user else None
 
 
     @staticmethod
-    @with_session
-    async def check_unique_email(email: str, session: AsyncSession) -> bool:
+    async def check_unique_email(email: str, session: AsyncSession):
         exist_email = await session.scalar(select(User).where(User.email == email))
-        return False if exist_email else True
+        if exist_email:
+            return exist_email
+        return False
 
 
     @staticmethod
-    @with_session
-    async def create_user(user: UserIn, is_admin: bool, session: AsyncSession) -> Optional[UserOut]:
+    async def create_user(user: UserIn, is_admin: bool, session: AsyncSession):
         if await UserRepository.check_unique_email(user.email, session):
             raise HTTPException(400, 'Email already exists')
         new_user = User(username=user.username,
@@ -58,11 +54,10 @@ class UserRepository:
 
         await session.commit()
         await session.refresh(new_user)
-        return UserOut.from_orm(new_user)
+        return new_user
 
 
     @staticmethod
-    @with_session
     async def update_user(user_id: int, user: UserChange, session: AsyncSession) -> Optional[UserOut]:
         user_in_db = await UserRepository.get_user(user_id, session)
         if user_in_db:
@@ -77,7 +72,6 @@ class UserRepository:
 
 
     @staticmethod
-    @with_session
     async def delete_user(user_id: int, session: AsyncSession) -> Optional[dict]:
         user_in_db = await UserRepository.get_user(user_id, session)
         if user_in_db:
@@ -90,7 +84,6 @@ class UserRepository:
 
 
     @staticmethod
-    @with_session
     async def polls_by_user(username: str ,poll_id: int, session: AsyncSession) -> Optional[bool]:
         user_in_db = await session.scalar(select(User).where(User.username == username))
         if user_in_db:

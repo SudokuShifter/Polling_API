@@ -1,3 +1,3 @@
-from .answer import AnswerResult
-from .reg_auth import LoginRegister
-from .polls_crud import PollCrud
+from .answer import AnswerRouter
+from .reg_auth import LoginRegisterRouter
+from .polls_crud import PollRouter

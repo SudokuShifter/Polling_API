@@ -7,19 +7,18 @@ from sqlalchemy.future import select
 from starlette.responses import JSONResponse
 
 from db.database import async_session_marker
-from routers.answer import AnswerResult
+from routers.answer import AnswerRouter
 from schemas.poll import QuestionIn
 from schemas.user import UserIn
 
 from schemas.user_result import UserResult as UserRes
 from models.db_models import UserResult, Question, Answer
-from repository.decorators.session import with_session
+
 
 
 class ResultRepository:
 
     @staticmethod
-    @with_session
     async def get_question(question_id: int, session: AsyncSession):
         res = await session.scalar(select(Question).where(Question.id == question_id))
         if not res:
@@ -28,21 +27,18 @@ class ResultRepository:
 
 
     @staticmethod
-    @with_session
     async def get_all_results_by_poll_id(poll_id: int, session: AsyncSession) -> Sequence[UserRes]:
         res = await session.scalars(select(UserResult).where(UserResult.poll_id == poll_id))
         return res.all()
 
 
     @staticmethod
-    @with_session
     async def get_all_results_by_user_id(user_id: int, session: AsyncSession) -> Sequence[UserRes]:
         res = await session.scalars(select(UserResult).where(UserResult.user_id == user_id))
         return res.all()
 
 
     @staticmethod
-    @with_session
     async def get_one_result(result_id: int, session: AsyncSession) -> UserRes:
         res = await session.scalar(select(UserResult).where(UserResult.id == result_id))
         if not res:
@@ -52,7 +48,6 @@ class ResultRepository:
 
 
     @staticmethod
-    @with_session
     async def answer_for_question(answer, question_id, session: AsyncSession) -> bool:
         question = await ResultRepository.get_question(question_id, session)
         if question.current_answer == answer:
@@ -61,7 +56,6 @@ class ResultRepository:
 
 
     @staticmethod
-    @with_session
     async def add_result_for_question(point: bool, answer: str,
                                       question: QuestionIn, user_id: int, session: AsyncSession) -> JSONResponse:
 
@@ -86,7 +80,6 @@ class ResultRepository:
 
 
     @staticmethod
-    @with_session
     async def generate_result(questions: Sequence[Question],
                                                         user_id: int, session: AsyncSession) -> UserRes:
         try:

@@ -43,9 +43,9 @@ class User(Base):
     )
 
     # Связи
-    polls = relationship('Poll', back_populates='admin', cascade='all, delete, delete-orphan')
+    polls = relationship('Poll', back_populates='user', cascade='all, delete, delete-orphan')
     user_results = relationship('UserResult', back_populates='user')
-    results = relationship('UserResult', back_populates='user')
+    answers = relationship('Answer', back_populates='user')
 
 
 class Poll(Base):
@@ -72,6 +72,7 @@ class Poll(Base):
     user = relationship('User', back_populates='polls')
     questions = relationship('Question', back_populates='poll', cascade='all, delete, delete-orphan')
     user_results = relationship('UserResult', back_populates='poll')
+    answers = relationship('Answer', back_populates='poll')
 
 
 class Question(Base):
@@ -123,8 +124,9 @@ class Answer(Base):
 
 
     #Связи
-    question = relationship('Question', back_populates='answer')
+    question = relationship('Question', back_populates='answers')
     poll = relationship('Poll', back_populates='answers')
+    user = relationship('User', back_populates='answers')
 
 
 class UserResult(Base):
