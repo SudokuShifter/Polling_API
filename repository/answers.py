@@ -7,13 +7,13 @@ from sqlalchemy.future import select
 from starlette.responses import JSONResponse
 
 from db.database import async_session_marker
-from routers.answer import Answer
+from routers.answer import AnswerResult
 from schemas.poll import QuestionIn
 from schemas.user import UserIn
 
 from schemas.user_result import UserResult as UserRes
 from models.db_models import UserResult, Question, Answer
-from decorators.session import with_session
+from repository.decorators.session import with_session
 
 
 class ResultRepository:
@@ -105,4 +105,4 @@ class ResultRepository:
             await session.refresh(result)
             return result
         except HTTPException:
-            raise HTTPException(404, detail='Question or detail not found')
+            raise HTTPException(404, detail='Answers or questions not found')

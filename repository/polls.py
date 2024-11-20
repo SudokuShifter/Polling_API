@@ -12,7 +12,7 @@ from typing import List, Union, Optional
 
 from schemas.poll import PollInFirst, PollInChange, QuestionIn, QuestionOut, PollOut
 from models.db_models import Poll, Question
-from decorators.session import with_session
+from repository.decorators.session import with_session
 
 
 class PollRepository:

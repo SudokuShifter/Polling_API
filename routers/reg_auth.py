@@ -7,8 +7,8 @@ from fastapi.responses import JSONResponse
 from typing import Optional, Annotated
 import os
 
-from JWT.JWT_token import JWTToken
-from schemas.user import UserIn, UserLogin
+from routers.JWT.JWT_token import JWTToken
+from schemas.user import UserLogin
 from models.db_models import User
 from repository.users import UserRepository
 
@@ -37,7 +37,7 @@ class LoginRegister(APIRouter):
 
 
     @post('/register')
-    async def register(self, user: Optional[UserIn]):
+    async def register(self, user):
         if user:
             if user.admin_token and user.admin_token == os.getenv('ADMIN_TOKEN'):
                 res = await self.rep.create_user(user, is_admin=True)

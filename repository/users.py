@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from schemas.user import UserIn, UserChange, UserLogin, UserOut
 from models.db_models import User, RoleUserEnum
-from decorators.session import with_session
+from repository.decorators.session import with_session
 
 class UserRepository:
 

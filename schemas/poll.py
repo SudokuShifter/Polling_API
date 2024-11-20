@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from datetime import datetime, timedelta, date
 
@@ -16,8 +16,7 @@ class QuestionIn(BaseModel):
         min_length=1, max_length=100
     )
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class QuestionOut(QuestionIn):
@@ -32,13 +31,11 @@ class PollInChange(BaseModel):
     date_end: date = Field(
         default_factory=lambda: date.today() + timedelta(days=30)
     )
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class PollInFirst(PollInChange):
-    date_start: datetime.date = Field(
+    date_start: date = Field(
         default_factory=date.today
     )
 

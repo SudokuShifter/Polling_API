@@ -4,7 +4,7 @@ from classy_fastapi import Routable, get, post, put, delete
 
 from typing import Optional, Annotated, List
 
-from schemas.poll import PollInFirst, PollInChange, PollOut, QuestionIn
+
 from routers.reg_auth import LoginRegister
 
 
@@ -48,7 +48,7 @@ class PollCrud(APIRouter):
 
 
     @post('/create_poll')
-    async def create_poll(self, poll: PollInFirst,
+    async def create_poll(self, poll,
                           current_user: dict = Depends(LoginRegister.get_current_user)):
 
         await self.is_admin(current_user)
@@ -58,7 +58,7 @@ class PollCrud(APIRouter):
 
 
     @put('/update_poll/{poll_id}')
-    async def update_poll(self, poll_id: int, poll_data: PollInChange,
+    async def update_poll(self, poll_id: int, poll_data,
                           current_user: dict = Depends(LoginRegister.get_current_user)):
         await self.is_admin(current_user)
         await self.user_has_poll_access(current_user, poll_id)
@@ -77,7 +77,7 @@ class PollCrud(APIRouter):
 
 
     @post('/add_question/{poll_id}')
-    async def add_question(self, poll_id: int, question: QuestionIn,
+    async def add_question(self, poll_id: int, question,
                            current_user: dict = Depends(LoginRegister.get_current_user)):
         await self.is_admin(current_user)
         await self.user_has_poll_access(current_user, poll_id)

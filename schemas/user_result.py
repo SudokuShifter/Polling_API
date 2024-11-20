@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class UserResultOut(BaseModel):
@@ -8,8 +8,7 @@ class UserResultOut(BaseModel):
         ge=0
     )
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserResult(UserResultOut):
@@ -19,8 +18,7 @@ class UserResult(UserResultOut):
 class AnswerIn(BaseModel):
     answer: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AnswerOut(AnswerIn):
