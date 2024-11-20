@@ -43,9 +43,9 @@ class User(Base):
     )
 
     # Связи
-    polls = relationship('Poll', back_populates='admin', cascade='all, delete, delete-orphan')
+    polls = relationship('Poll', back_populates='user', cascade='all, delete, delete-orphan')
     user_results = relationship('UserResult', back_populates='user')
-    results = relationship('UserResult', back_populates='user')
+    answers = relationship('Answer', back_populates='user')
 
 
 class Poll(Base):
@@ -72,6 +72,7 @@ class Poll(Base):
     user = relationship('User', back_populates='polls')
     questions = relationship('Question', back_populates='poll', cascade='all, delete, delete-orphan')
     user_results = relationship('UserResult', back_populates='poll')
+    answers = relationship('Answer', back_populates='poll')
 
 
 class Question(Base):
@@ -107,20 +108,25 @@ class Answer(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True
     )
-    poll_id: Mapped[int] = mapped_column(
-        ForeignKey('polls.id'), nullable=False
-    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id'), nullable=True
     )
-    answer: Mapped[bool] = mapped_column(
+    poll_id: Mapped[int] = mapped_column(
+        ForeignKey('polls.id'), nullable=False
+    )
+    question_id: Mapped[int] = mapped_column(
+        ForeignKey('questions.id'), nullable=False
+    )
+    answer: Mapped[str]
+    point: Mapped[bool] = mapped_column(
         default=False
     )
 
-    #Связи
-    poll = relationship('Poll', back_populates='answer')
-    question = relationship('Question', back_populates='answer')
 
+    #Связи
+    question = relationship('Question', back_populates='answers')
+    poll = relationship('Poll', back_populates='answers')
+    user = relationship('User', back_populates='answers')
 
 
 class UserResult(Base):

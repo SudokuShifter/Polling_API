@@ -8,31 +8,21 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path='.env')
 
 
-class JWT(metaclass=ABCMeta):
-
-    @abstractmethod
-    def generate_token(self, data: dict):
-        pass
-
-
-    @abstractmethod
-    def decode_token(self, token):
-        pass
-
-
-class JWTToken(JWT):
+class JWTToken:
 
     SECRET_KEY = os.getenv('SECRET_KEY')
     ALGORITHM = os.getenv('ALGORITHM')
     TIME_EXPIRE_TOKEN = 30
 
-    def generate_token(self, data: dict):
+    @staticmethod
+    def generate_token(data: dict):
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(minutes=JWTToken.TIME_EXPIRE_TOKEN)
         to_encode.update({'exp': expire})
         return jwt.encode(to_encode,JWTToken.SECRET_KEY, algorithm=JWTToken.ALGORITHM)
 
-    def decode_token(self, token):
+    @staticmethod
+    def decode_token(token):
         payload = jwt.decode(token, JWTToken.SECRET_KEY, algorithms=[JWTToken.ALGORITHM])
         return payload.get('sub')
 
