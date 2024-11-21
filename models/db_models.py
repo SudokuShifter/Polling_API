@@ -149,3 +149,16 @@ class UserResult(Base):
     # Связи
     user = relationship('User', back_populates='user_results')
     poll = relationship('Poll', back_populates='user_results')
+
+
+class AccessToken(Base):
+
+    __tablename__ = 'access_tokens'
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+
+    token: Mapped[str] = mapped_column(
+        unique=True, nullable=False
+    )

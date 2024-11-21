@@ -13,8 +13,8 @@ class AnswerRouter:
         self.router = APIRouter()
         self.rep = rep
         self.router.add_api_route('/my_results', self.get_my_results, methods=['GET'])
-        self.router.add_api_route('/get_answer/{question_id}', self.post_answer, methods=['POST'])
-        self.router.add_api_route('/get_answer_for_unauthorize/{question_id}', self.post_answer_for_unauthorize, methods=['POST'])
+        self.router.add_api_route('/post_answer/{question_id}', self.post_answer, methods=['POST'])
+        self.router.add_api_route('/post_answer_for_unauthorize/{question_id}', self.post_answer_for_unauthorize, methods=['POST'])
         self.router.add_api_route('/create_result_for_poll/{poll_id}', self.post_result_for_poll, methods=['POST'])
 
 
