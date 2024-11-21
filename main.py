@@ -15,13 +15,6 @@ from repository.session_db.session import get_db
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 poll_rep = PollRepository()
 user_rep = UserRepository()

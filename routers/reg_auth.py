@@ -28,15 +28,6 @@ class LoginRegisterRouter:
         self.router.add_api_route('/login', self.login, methods=['POST'])
         self.router.add_api_route('/check_token', self.check_token, methods=['GET'])
         self.router.add_api_route('/logout', self.logout, methods=['POST'])
-        self.router.add_api_route('/check_cookies', self.check_cookies, methods=['GET'])
-        self.router.add_api_route('/set_cookies', self.set_cookie, methods=['POST'])
-
-
-
-    async def set_cookie(self, request: Request, response: Response):
-        response.set_cookie('token', 'aboba1213123123')
-        return {'message': 'Successfully set cookie',
-                'cookies': request.cookies}
 
 
     @staticmethod
@@ -50,19 +41,15 @@ class LoginRegisterRouter:
 
     @staticmethod
     async def get_current_user(token: str = Depends(get_token_from_cookies)):
-        try:
+        if token:
+            print(token)
             payload = JWTToken.decode_token(token)
+            print(payload)
             user = {'user': payload.get('user'),
                     'role': payload.get('role')}
             if user:
                 return user
-            raise HTTPException(401, detail='Invalid Token')
-        except HTTPException:
-            raise HTTPException(401, detail='Invalid or expired token')
-
-
-    async def check_cookies(self, request: Request):
-        return {'cookies': request.cookies}
+        raise HTTPException(401, detail='Invalid or expired token')
 
 
     async def register(self, user: UserIn, db: AsyncSession = Depends(get_db)):
@@ -79,10 +66,10 @@ class LoginRegisterRouter:
                     db: AsyncSession = Depends(get_db)):
         res = await self.rep.login(UserLogin(username=form_data.username, password=form_data.password), session=db)
         if res:
-            data_to_token = {
+            data_to_token = {'sub': {
                 'id': res.id,
                 'username': res.username,
-                'role': res.role
+                'role': res.role}
             }
             access_token = JWTToken.generate_token(data=data_to_token)
             response.set_cookie('token', access_token, httponly=True)
