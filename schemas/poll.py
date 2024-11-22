@@ -9,7 +9,7 @@ class QuestionIn(BaseModel):
     title: str = Field(
         min_length=3, max_length=100
     )
-    type: str = Field(
+    answer: str = Field(
         min_length=1, max_length=100
     )
     current_answer: Optional[str] = Field(

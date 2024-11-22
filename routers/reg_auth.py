@@ -25,13 +25,17 @@ class LoginRegisterRouter:
     def __init__(self, rep):
         self.router = APIRouter()
         self.rep = rep
-        self.router.add_api_route('/register', self.register, methods=['POST'])
-        self.router.add_api_route('/login', self.login, methods=['POST'])
-        self.router.add_api_route('/logout', self.logout, methods=['POST'])
+        self.router.add_api_route('/register',
+                                  self.register, methods=['POST'])
+        self.router.add_api_route('/login',
+                                  self.login, methods=['POST'])
+        self.router.add_api_route('/logout',
+                                  self.logout, methods=['POST'])
 
 
     @staticmethod
     def get_token_from_cookies(request: Request):
+
         token = request.cookies.get('token')
         if not token:
             raise HTTPException(401, detail='Not authenticated')
@@ -41,6 +45,7 @@ class LoginRegisterRouter:
 
     @staticmethod
     async def get_current_user(token: str = Depends(get_token_from_cookies)):
+
         try:
             payload = JWTToken.decode_token(token)
             user = {'id': payload.get('id'),
@@ -48,6 +53,7 @@ class LoginRegisterRouter:
                     'role': payload.get('role')}
             if user:
                 return user
+
         except ExpiredSignatureError:
                 raise ValueError('Token is expired, please login again')
         except InvalidTokenError:
@@ -55,18 +61,22 @@ class LoginRegisterRouter:
 
 
     async def register(self, user: UserIn, db: AsyncSession = Depends(get_db)):
+
         if user:
-            print(os.getenv('ADMIN_TOKEN'))
             if user.admin_token and user.admin_token == os.getenv('ADMIN_TOKEN'):
                 res = await self.rep.create_user(user, is_admin=True, session=db)
             else:
                 res = await self.rep.create_user(user, is_admin=False, session=db)
+
             return JSONResponse(content={'message': f'Successfully create user {res}'})
+
         raise HTTPException(status_code=404, detail='Data not found')
 
 
-    async def login(self, request: Request, response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    async def login(self, request: Request, response: Response,
+                    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                     db: AsyncSession = Depends(get_db)):
+
         res = await self.rep.login(UserLogin(username=form_data.username, password=form_data.password), session=db)
         if res:
             data_to_token = {'sub': {
@@ -87,6 +97,7 @@ class LoginRegisterRouter:
 
 
     async def logout(self, response: Response):
+
         response.set_cookie('token', None)
         return JSONResponse(content={'message': 'Successfully logged out'},
                             headers=response.headers)
