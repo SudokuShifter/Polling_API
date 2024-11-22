@@ -19,45 +19,61 @@ from models.db_models import UserResult, Question, Answer
 class ResultRepository:
 
     @staticmethod
-    async def get_question(question_id: int, session: AsyncSession):
+    async def get_question(question_id: int,
+                           session: AsyncSession) -> Question:
+
         res = await session.scalar(select(Question).where(Question.id == question_id))
+        print(res)
         if not res:
             raise HTTPException(404, detail="Question not found")
         return res
 
 
     @staticmethod
-    async def get_all_results_by_poll_id(poll_id: int, session: AsyncSession) -> Sequence[UserRes]:
+    async def get_all_results_by_poll_id(poll_id: int,
+                                         session: AsyncSession) -> Sequence[UserRes]:
+
         res = await session.scalars(select(UserResult).where(UserResult.poll_id == poll_id))
+
         return res.all()
 
 
     @staticmethod
-    async def get_all_results_by_user_id(user_id: int, session: AsyncSession) -> Sequence[UserRes]:
+    async def get_all_results_by_user_id(user_id: int,
+                                         session: AsyncSession) -> Sequence[UserRes]:
+
         res = await session.scalars(select(UserResult).where(UserResult.user_id == user_id))
+
         return res.all()
 
 
     @staticmethod
-    async def get_one_result(result_id: int, session: AsyncSession) -> UserRes:
+    async def get_one_result(result_id: int,
+                             session: AsyncSession) -> UserRes:
+
         res = await session.scalar(select(UserResult).where(UserResult.id == result_id))
         if not res:
             raise HTTPException(404, detail='result not found')
+
         return res
 
 
 
     @staticmethod
-    async def answer_for_question(answer, question_id, session: AsyncSession) -> bool:
+    async def answer_for_question(answer, question_id,
+                                  session: AsyncSession) -> bool:
+
         question = await ResultRepository.get_question(question_id, session)
         if question.current_answer == answer:
             return True
+
         return False
 
 
     @staticmethod
     async def add_result_for_question(point: bool, answer: str,
-                                      question: QuestionIn, user_id: int, session: AsyncSession) -> JSONResponse:
+                                      question: QuestionIn, user_id: int,
+                                      session: AsyncSession) -> dict:
 
         answer_for_1_question = Answer(
             user_id=user_id if user_id else None,
@@ -67,7 +83,7 @@ class ResultRepository:
             poll_id=question.poll_id
         )
 
-        exist_answer = await session.scalar(select(Answer()).where(
+        exist_answer = await session.scalar(select(Answer).where(
             Answer.user_id == user_id,
             Answer.question_id == question.id))
 
@@ -76,26 +92,24 @@ class ResultRepository:
 
         session.add(answer_for_1_question)
         await session.commit()
-        return JSONResponse({'Success': 'Answer is save'})
+
+        return {'Success': 'Answer is save'}
 
 
     @staticmethod
-    async def generate_result(questions: Sequence[Question],
-                                                        user_id: int, session: AsyncSession) -> UserRes:
-        try:
-            results = [i.answers.point for i in questions if i.answers.user_id == user_id]
-            points = len([i for i in results if i])
-            result = UserResult(
-                user_id=user_id,
-                poll_id=questions[0].poll_id,
-                result=points,
-            )
-            exist_result = await session.scalar(select(UserResult).where(
-                UserResult.user_id == user_id,
-                UserResult.poll_id == questions[0].poll_id))
-            session.add(result)
-            await session.commit()
-            await session.refresh(result)
-            return result
-        except HTTPException:
-            raise HTTPException(404, detail='Answers or questions not found')
+    async def generate_result(poll_id: int, user_id: int,
+                              session: AsyncSession) -> dict:
+
+        res = await session.scalars(select(Answer).where(
+            Answer.user_id == user_id,
+            Answer.poll_id == poll_id))
+
+        answers = res.all()
+        user_res = UserResult(user_id=user_id,
+                              poll_id=poll_id,
+                              result=[i.point for i in res].count(True))
+        session.add(user_res)
+        await session.commit()
+
+        return {'Success': 'Result is save', 'id_poll': poll_id, 'your_res': user_res.result}
+

@@ -9,7 +9,7 @@ class QuestionIn(BaseModel):
     title: str = Field(
         min_length=3, max_length=100
     )
-    type: str = Field(
+    answer: str = Field(
         min_length=1, max_length=100
     )
     current_answer: Optional[str] = Field(
@@ -31,7 +31,7 @@ class PollInChange(BaseModel):
     date_end: date = Field(
         default_factory=lambda: date.today() + timedelta(days=30)
     )
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, from_attributes=True)
 
 
 class PollInFirst(PollInChange):
@@ -43,3 +43,4 @@ class PollInFirst(PollInChange):
 class PollOut(PollInFirst):
     id: int
     questions: Optional[List[QuestionOut] | None]
+    model_config = ConfigDict(arbitrary_types_allowed=True, from_attributes=True)

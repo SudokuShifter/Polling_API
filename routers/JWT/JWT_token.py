@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 import os
 from dotenv import load_dotenv
-
+from jwt import ExpiredSignatureError, InvalidTokenError
 
 load_dotenv(dotenv_path='.env')
 
@@ -16,10 +16,9 @@ class JWTToken:
 
     @staticmethod
     def generate_token(data: dict):
-        to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(minutes=JWTToken.TIME_EXPIRE_TOKEN)
-        to_encode.update({'exp': expire})
-        return jwt.encode(to_encode,JWTToken.SECRET_KEY, algorithm=JWTToken.ALGORITHM)
+        data.update({'exp': expire})
+        return jwt.encode(data,JWTToken.SECRET_KEY, algorithm=JWTToken.ALGORITHM)
 
     @staticmethod
     def decode_token(token):
