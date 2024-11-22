@@ -69,12 +69,12 @@ class AnswerRouter:
         return AnswerRouter.generate_response(success=False, data=res, detail=None)
 
 
-    async def post_result_for_poll(self, poll_id: str,
+    async def post_result_for_poll(self, poll_id: int,
                                    current_user: dict = Depends(LoginRegisterRouter.get_current_user),
                                    db: AsyncSession = Depends(get_db)):
 
         await self.is_user(current_user)
-        if PollRepository.poll_is_active(poll_id, session=db):
+        if PollRepository.poll_is_active(poll_id=poll_id, session=db):
             questions = await self.rep.get_question(poll_id)
             res = self.rep.generate_result(questions, current_user['id'], session=db)
             return AnswerRouter.generate_response(success=True, data=res, detail=None)

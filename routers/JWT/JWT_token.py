@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 import os
 from dotenv import load_dotenv
-
+from jwt import ExpiredSignatureError, InvalidTokenError
 
 load_dotenv(dotenv_path='.env')
 

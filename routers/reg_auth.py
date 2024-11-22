@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from typing import Optional, Annotated
 import os
 
+from jwt import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repository.session_db.session import get_db
@@ -26,7 +27,6 @@ class LoginRegisterRouter:
         self.rep = rep
         self.router.add_api_route('/register', self.register, methods=['POST'])
         self.router.add_api_route('/login', self.login, methods=['POST'])
-        self.router.add_api_route('/check_token', self.check_token, methods=['GET'])
         self.router.add_api_route('/logout', self.logout, methods=['POST'])
 
 
@@ -41,19 +41,22 @@ class LoginRegisterRouter:
 
     @staticmethod
     async def get_current_user(token: str = Depends(get_token_from_cookies)):
-        if token:
-            print(token)
+        try:
             payload = JWTToken.decode_token(token)
-            print(payload)
-            user = {'user': payload.get('user'),
+            user = {'id': payload.get('id'),
+                    'user': payload.get('user'),
                     'role': payload.get('role')}
             if user:
                 return user
-        raise HTTPException(401, detail='Invalid or expired token')
+        except ExpiredSignatureError:
+                raise ValueError('Token is expired, please login again')
+        except InvalidTokenError:
+            raise ValueError('Token is invalid, please login again')
 
 
     async def register(self, user: UserIn, db: AsyncSession = Depends(get_db)):
         if user:
+            print(os.getenv('ADMIN_TOKEN'))
             if user.admin_token and user.admin_token == os.getenv('ADMIN_TOKEN'):
                 res = await self.rep.create_user(user, is_admin=True, session=db)
             else:
@@ -73,16 +76,20 @@ class LoginRegisterRouter:
             }
             access_token = JWTToken.generate_token(data=data_to_token)
             response.set_cookie('token', access_token, httponly=True)
-            print(response.headers)
-            return JSONResponse(content={'message': f'Successfully logged in as {res.username}',
-                    'token': f'{access_token}',
-                    'cookies': request.cookies}, headers=response.headers)
+
+            return JSONResponse(content={
+                'message': f'Successfully logged in as {res.username}',
+                'token': f'{access_token}',
+                'cookies': request.cookies},
+                                headers=response.headers)
+
         raise HTTPException(status_code=401, detail='Invalid credentials')
 
 
     async def logout(self, response: Response):
-        response.headers['Authorization'] = 'None'
-        return JSONResponse(content={'message': 'Successfully logged out'})
+        response.set_cookie('token', None)
+        return JSONResponse(content={'message': 'Successfully logged out'},
+                            headers=response.headers)
 
 
     async def check_token(self, token: str = Depends(OAUTH2_SCHEME)):
