@@ -68,7 +68,6 @@ class PollRouter:
     async def create_poll(self, poll: PollInFirst,
                           current_user: dict = Depends(LoginRegisterRouter.get_current_user),
                           db: AsyncSession = Depends(get_db)):
-
         await self.is_admin(current_user)
         res = await self.rep.create_poll(current_user['id'], poll, db)
 

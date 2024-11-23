@@ -44,7 +44,16 @@ class UserRepository:
 
         exist_email = await session.scalar(select(User).where(User.email == email))
         if exist_email:
-            return exist_email
+            return True
+        return False
+
+
+    @staticmethod
+    async def check_unique_username(username: str, session: AsyncSession):
+        exit_username = await session.scalar(select(User).where(User.username == username))
+
+        if exit_username:
+            return True
         return False
 
 
@@ -69,7 +78,12 @@ class UserRepository:
     async def update_user(user_id: int, user: UserChange,
                           session: AsyncSession) -> Optional[dict]:
 
+        if (await UserRepository.check_unique_email(user.email, session)
+                or await UserRepository.check_unique_username(user.username, session)):
+            raise HTTPException(400, 'Email or username already exists')
+
         user_in_db = await UserRepository.get_user(user_id, session)
+
         if user_in_db:
             for key, value in user.dict(exclude_unset=True).items():
                 setattr(user_in_db, key, value)
@@ -92,17 +106,15 @@ class UserRepository:
             raise HTTPException(404, detail='User not found')
 
         await session.commit()
-
         return {'message': 'User deleted'}
 
 
     @staticmethod
-    async def polls_by_user(user_id: str ,poll_id: int, session: AsyncSession) -> Optional[bool]:
+    async def polls_by_user(user_id: str, poll_id: int, session: AsyncSession) -> Optional[bool]:
 
         user_in_db = await session.scalar(select(User).where(User.id == user_id))
         if user_in_db:
             polls = {poll_id for poll_id in user_in_db.polls}
-            print(polls)
             return poll_id
 
         raise HTTPException(404, detail='User not found')
