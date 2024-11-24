@@ -10,7 +10,9 @@ from .confest_app import (
     incorrect_user,
     new_user_for_register,
     user_data_for_update,
-    exist_poll)
+    exist_poll,
+    auth_token,
+    new_poll)
 
 
 def test_login_route(client, current_user):
