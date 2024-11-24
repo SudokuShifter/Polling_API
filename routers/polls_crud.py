@@ -15,7 +15,7 @@ class PollRouter:
         self.rep = rep
         self.router.add_api_route('/get_polls',
                                   self.get_all_polls, methods=['GET'])
-        self.router.add_api_route('/get_polls/{poll_id}',
+        self.router.add_api_route('/get_poll/{poll_id}',
                                   self.get_poll, methods=['GET'])
         self.router.add_api_route('/create_poll',
                                   self.create_poll, methods=['POST'])

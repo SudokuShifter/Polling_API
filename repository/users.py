@@ -62,6 +62,10 @@ class UserRepository:
 
         if await UserRepository.check_unique_email(user.email, session):
             raise HTTPException(400, 'Email already exists')
+
+        if await UserRepository.check_unique_username(user.username, session):
+            raise HTTPException(400, 'Username already exists')
+
         new_user = User(username=user.username,
                         email=user.email,
                         password=pbkdf2_sha256.hash(user.password),
