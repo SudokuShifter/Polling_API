@@ -1,10 +1,8 @@
-import jwt
 from fastapi import APIRouter, HTTPException, Depends, Response, Request
-from classy_fastapi import Routable, get, post
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
 
-from typing import Optional, Annotated
+from typing import Annotated
 import os
 
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -13,8 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from repository.session_db.session import get_db
 from routers.JWT.JWT_token import JWTToken
 from schemas.user import UserLogin, UserIn, UserChange
-from models.db_models import User
-from repository.users import UserRepository
 
 
 
@@ -79,7 +75,7 @@ class LoginRegisterRouter:
         raise HTTPException(status_code=404, detail='Data not found')
 
 
-    async def login(self, request: Request, response: Response,
+    async def login(self, response: Response,
                     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                     db: AsyncSession = Depends(get_db)):
 
@@ -95,9 +91,7 @@ class LoginRegisterRouter:
 
             return JSONResponse(content={
                 'message': f'Successfully logged in as {res.username}',
-                'token': f'{access_token}',
-                'cookies': request.cookies},
-                                headers=response.headers)
+                'token': f'{access_token}'})
 
         raise HTTPException(status_code=401, detail='Invalid credentials')
 
@@ -109,7 +103,7 @@ class LoginRegisterRouter:
                             headers=response.headers)
 
 
-    async def change_data_user(self,response: Response, new_data: UserChange,
+    async def change_data_user(self, response: Response, new_data: UserChange,
                                db: AsyncSession = Depends(get_db),
                                current_user = Depends(get_current_user)):
         if current_user:
@@ -128,7 +122,6 @@ class LoginRegisterRouter:
     async def delete_account(self, db: AsyncSession = Depends(get_db),
                              current_user = Depends(get_current_user)):
         if current_user:
-            print(current_user)
             res = await self.rep.delete_user(current_user['id'], session=db)
             return res
         raise HTTPException(status_code=403, detail='Not enough permissions')
