@@ -47,12 +47,10 @@ class LoginRegisterRouter:
     @staticmethod
     def get_current_user(token: str = Depends(get_token_from_cookies)):
         try:
-            print(token)
             payload = JWTToken.decode_token(token)
             user = {'id': payload.get('id'),
                     'user': payload.get('user'),
                     'role': payload.get('role')}
-            print(user)
             if user:
                 return user
 
@@ -91,7 +89,7 @@ class LoginRegisterRouter:
 
             return JSONResponse(content={
                 'message': f'Successfully logged in as {res.username}',
-                'token': f'{access_token}'})
+                'token': f'{access_token}'}, headers=response.headers)
 
         raise HTTPException(status_code=401, detail='Invalid credentials')
 

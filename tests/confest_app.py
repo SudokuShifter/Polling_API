@@ -65,3 +65,9 @@ def auth_token():
 def new_poll():
     data = {'title': 'abobasss'}
     return data
+
+@pytest.fixture
+def login_user():
+    data = {'sub': {'id': 10, 'user': 'admin', 'role': 'admin'}}
+    token = JWTToken.generate_token(data)
+    yield token

@@ -2,6 +2,9 @@ import pytest
 from fastapi import Response
 from schemas.user import UserIn
 from routers.JWT.JWT_token import JWTToken
+from faker import Faker
+
+fake = Faker('ru-RU')
 
 
 from .confest_app import (
@@ -12,7 +15,7 @@ from .confest_app import (
     user_data_for_update,
     exist_poll,
     auth_token,
-    new_poll)
+    new_poll, login_user)
 
 
 def test_login_route(client, current_user):
@@ -49,13 +52,28 @@ def test_create_poll(client):
     response = client.post("/polls/create_poll", data={'title': 'test'})
     assert response.status_code == 401
 
+def test_create_poll_admin(client, login_user):
+    """
+    РАБОЧИЙ ТЕСТ. СМОТРЕТЬ СИГНАТУРУ ЗДЕСЬ
+    """
+    response = client.post(
+        "/polls/create_poll",
+        json={'title': fake.name()},
+        cookies={'token': login_user},
+        headers={'Content-Type': 'application/json'}
+    )
+    assert response.status_code == 200
+    assert response.json()['success'] == True
+
+
 def test_update_poll(client):
     response = client.put("/polls/update_poll/2", data={'title': 'test'})
     assert response.status_code == 401
 
-def test_delete_poll(client):
+def test_delete_poll(client, login_user):
     response = client.delete("/polls/delete_poll/2")
-    assert response.status_code == 401
+    client.cookies['token'] = login_user()
+    assert response.status_code == 200
 
 def test_add_question(client):
     response = client.post("/polls/add_question/2", data={'title': 'test'})
