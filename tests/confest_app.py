@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 from main import app
 from schemas.user import UserIn
 from faker import Faker
-
+from routers.JWT.JWT_token import JWTToken
 
 fake = Faker()
 
@@ -46,3 +48,26 @@ def exist_poll():
     response_data = {'data': {'poll': "{'poll': ['Poll_title - string', 'Poll_id - 2']}",
                               'questions': "{'questions': []}"}, 'detail': None, 'success': True}
     return response_data
+
+@pytest.fixture
+def auth_token():
+    payload = {
+        'sub': {
+            'username': 'string',
+            'id': 1,
+            'role': 'USER'
+        }
+    }
+    token = JWTToken.generate_token(payload)
+    return token
+
+@pytest.fixture
+def new_poll():
+    data = {'title': 'abobasss'}
+    return data
+
+@pytest.fixture
+def login_user():
+    data = {'sub': {'id': 10, 'user': 'admin', 'role': 'admin'}}
+    token = JWTToken.generate_token(data)
+    yield token
